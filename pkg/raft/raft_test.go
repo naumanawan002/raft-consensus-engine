@@ -1,51 +1,12 @@
 package raft
 
 import (
-	"sync"
 	"testing"
 	"time"
 )
 
-// MockNetwork routes RPCs between in-memory Raft nodes.
-type MockNetwork struct {
-	mu    sync.RWMutex
-	nodes map[string]*Node
-}
-
-func NewMockNetwork() *MockNetwork {
-	return &MockNetwork{nodes: make(map[string]*Node)}
-}
-
-func (m *MockNetwork) Register(node *Node) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.nodes[node.id] = node
-}
-
-func (m *MockNetwork) SendRequestVote(target string, args RequestVoteArgs) (RequestVoteReply, error) {
-	m.mu.RLock()
-	targetNode, exists := m.nodes[target]
-	m.mu.RUnlock()
-
-	if !exists {
-		return RequestVoteReply{}, nil
-	}
-	return targetNode.RequestVote(args), nil
-}
-
-func (m *MockNetwork) SendAppendEntries(target string, args AppendEntriesArgs) (AppendEntriesReply, error) {
-	m.mu.RLock()
-	targetNode, exists := m.nodes[target]
-	m.mu.RUnlock()
-
-	if !exists {
-		return AppendEntriesReply{}, nil
-	}
-	return targetNode.AppendEntries(args), nil
-}
-
 func TestRaft_LeaderElection_And_LogReplication(t *testing.T) {
-	net := NewMockNetwork()
+	net := NewInMemoryNetwork()
 	nodeIDs := []string{"node-1", "node-2", "node-3"}
 
 	nodes := make([]*Node, 3)

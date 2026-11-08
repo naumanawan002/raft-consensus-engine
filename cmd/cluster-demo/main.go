@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -23,7 +24,7 @@ func main() {
 	log.Println("  Based on Ongaro & Ousterhout Stanford Raft Paper")
 	log.Println("==========================================================")
 
-	net := raft.NewMockNetwork()
+	net := raft.NewInMemoryNetwork()
 	nodeIDs := []string{"node-alpha", "node-bravo", "node-charlie"}
 
 	nodes := make([]*raft.Node, 3)
